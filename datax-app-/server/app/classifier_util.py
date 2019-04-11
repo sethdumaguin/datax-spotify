@@ -84,13 +84,15 @@ def suggest_playlist_from_mood(all_tracks_with_features, mood):
 
 
 def suggest_playlist_from_text(all_tracks_with_features, text):
-    current_app.logger.info(text)
+    current_app.logger.warn(text)
 
     text = stemSentence(text, porter, word_token)
 
     feat = word_vec.transform([text])
 
     predicted_score = ridge_reg.predict(feat)
+
+    current_app.logger.warn(predicted_score)
 
     return suggest_playlist_from_mood(all_tracks_with_features, predicted_score)
 
