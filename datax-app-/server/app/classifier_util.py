@@ -26,18 +26,14 @@ with open('app/porter.pickle', 'rb') as fc:
 with open('app/word_token.pickle', 'rb') as fc:
     word_token = pickle.load(fc)
 
-with open('app/Rf_model.pickle', 'rb') as fd:
-    rf = pickle.load(fd)
 
 
 
 def suggest_playlist_from_mood(all_tracks_with_features, mood):
     # Make song data of user fit our model
     data = pd.DataFrame.from_dict(all_tracks_with_features)
-    # new_labels = {'tempo': 'bpm', 'danceability': 'dnce', 'energy': 'nrgy', 'loudness': 'dB', 'liveliness': 'live',
-    #               'valence': 'val', 'duration_ms': 'dur', 'acousticness': 'acous'}
     new_labels = {'tempo': 'bpm', 'danceability': 'dnce', 'energy': 'nrgy', 'loudness': 'dB', 'liveliness': 'live',
-                  'valence': 'val', 'duration_ms': 'dur', 'acousticness': 'acous', 'Speechiness': 'spch'}
+                  'valence': 'val', 'duration_ms': 'dur', 'acousticness': 'acous'}
     data = data.rename(columns=new_labels)
 
     def prep_data(frame):
@@ -51,12 +47,6 @@ def suggest_playlist_from_mood(all_tracks_with_features, mood):
         col_range = max(col) - min(col)
         avg = np.mean(col)
         return (col - avg) / col_range
-
-    def normalize_zeroone(col):
-        col_range = max(col) - min(col)
-        mini = min(col)
-        avg = np.mean(col)
-        return (col - mini) / col_range
 
     def prep_features(tbl):
         tbl_norm = tbl
@@ -73,8 +63,8 @@ def suggest_playlist_from_mood(all_tracks_with_features, mood):
 
     def predict_songs(tbl):
         tbl_predicted = tbl
-        predicted = rf.predict(tbl.loc[:, ['bpm', 'nrgy', 'dnce', 'dB', 'live', 'val', 'dur', 'acous', 'spch', 'pop']])
-        tbl_predicted['mood_predicted'] = normalize_zeroone(predicted)
+        predicted = lm.predict(tbl.loc[:, ['bpm', 'nrgy', 'dnce', 'dB', 'val', 'dur', 'acous']])
+        tbl_predicted['mood_predicted'] = predicted
         return tbl_predicted
 
     predicted = predict_songs(data)
