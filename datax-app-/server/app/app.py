@@ -33,7 +33,7 @@ def index():
 
 
 def get_all_tracks_with_features(access_token):
-    all_tracks = spotify.get_all_tracks(access_token, 100)
+    all_tracks = spotify.get_all_tracks(access_token, 300)
     all_tracks_features = spotify.get_audio_features(access_token, all_tracks)
     [track.update(features) for track, features in zip(all_tracks, all_tracks_features)]
     return all_tracks
