@@ -7,8 +7,8 @@ import numpy as np
 
 from flask import current_app
 
-from nltk.stem import PorterStemmer
-from nltk.stem import LancasterStemmer
+# from nltk.stem import PorterStemmer
+# from nltk.stem import LancasterStemmer
 
 with open('app/lm.pickle', 'rb') as fi:
     lm = pickle.load(fi)
@@ -17,14 +17,27 @@ with open('app/word_vec.pickle', 'rb') as fb:
     word_vec = pickle.load(fb)
 
 with open('app/ridge_reg.pickle', 'rb') as fc:
+    # This is for sentiment analysis!!!
     ridge = pickle.load(fc)
+
+with open('app/porter.pickle', 'rb') as fc:
+    porter = pickle.load(fc)
+
+with open('app/word_token.pickle', 'rb') as fc:
+    word_token = pickle.load(fc)
+
+with open('app/Rf_model.pickle', 'rb') as fd:
+    rf = pickle.load(fd)
+
 
 
 def suggest_playlist_from_mood(all_tracks_with_features, mood):
     # Make song data of user fit our model
     data = pd.DataFrame.from_dict(all_tracks_with_features)
+    # new_labels = {'tempo': 'bpm', 'danceability': 'dnce', 'energy': 'nrgy', 'loudness': 'dB', 'liveliness': 'live',
+    #               'valence': 'val', 'duration_ms': 'dur', 'acousticness': 'acous'}
     new_labels = {'tempo': 'bpm', 'danceability': 'dnce', 'energy': 'nrgy', 'loudness': 'dB', 'liveliness': 'live',
-                  'valence': 'val', 'duration_ms': 'dur', 'acousticness': 'acous'}
+                  'valence': 'val', 'duration_ms': 'dur', 'acousticness': 'acous', 'Speechiness': 'spch'}
     data = data.rename(columns=new_labels)
 
     def prep_data(frame):
@@ -38,6 +51,12 @@ def suggest_playlist_from_mood(all_tracks_with_features, mood):
         col_range = max(col) - min(col)
         avg = np.mean(col)
         return (col - avg) / col_range
+
+    def normalize_zeroone(col):
+        col_range = max(col) - min(col)
+        mini = min(col)
+        avg = np.mean(col)
+        return (col - mini) / col_range
 
     def prep_features(tbl):
         tbl_norm = tbl
@@ -54,8 +73,8 @@ def suggest_playlist_from_mood(all_tracks_with_features, mood):
 
     def predict_songs(tbl):
         tbl_predicted = tbl
-        predicted = lm.predict(tbl.loc[:, ['bpm', 'nrgy', 'dnce', 'dB', 'val', 'dur', 'acous']])
-        tbl_predicted['mood_predicted'] = predicted
+        predicted = rf.predict(tbl.loc[:, ['bpm', 'nrgy', 'dnce', 'dB', 'live', 'val', 'dur', 'acous', 'spch', 'pop']])
+        tbl_predicted['mood_predicted'] = normalize_zeroone(predicted)
         return tbl_predicted
 
     predicted = predict_songs(data)
@@ -76,8 +95,22 @@ def suggest_playlist_from_mood(all_tracks_with_features, mood):
 
 def suggest_playlist_from_text(all_tracks_with_features, text):
     current_app.logger.info(text)
-    
 
-    mood_score = .5
+    text = stemSentence(text, porter, word_token)
 
-    return suggest_playlist_from_mood(all_tracks_with_features, mood_score)
+    feat = word_vec.transform([text])
+
+    predicted_score = ridge_reg.predict(feat)
+
+    return suggest_playlist_from_mood(all_tracks_with_features, predicted_score)
+
+
+def stemSentence(sentence, porter, word_tokenize):
+    token_words=word_tokenize(sentence)
+    token_words
+    stem_sentence=[]
+    for word in token_words:
+        stem_sentence.append(porter.stem(word))
+        stem_sentence.append(" ")
+    return "".join(stem_sentence)
+
