@@ -90,7 +90,7 @@ def suggest_playlist_from_text(all_tracks_with_features, text):
 
     feat = word_vec.transform([text])
 
-    predicted_score = ridge_reg.predict(feat)
+    predicted_score = ridge.predict(feat)
 
     current_app.logger.warn(predicted_score)
 
