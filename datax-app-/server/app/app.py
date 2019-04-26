@@ -46,6 +46,35 @@ def dumps_playlist(playlist):
     } for track in playlist])
 
 
+@bp.route('/playlist/create/picture', methods=('POST',))
+def playlist_create_picture():
+    access_token = get_access_token()
+    photo = request.files['photo']
+    current_app.logger.warn(photo)
+
+    rock = bool(request.args.get('rock', ''))
+
+    if not access_token:
+        return '{"error":"Not authorized"}', 403
+
+    # Getting all tracks
+    current_app.logger.info('Getting all tracks & features')
+    all_tracks = get_all_tracks_with_features(access_token)
+
+    # Classifying things
+    current_app.logger.info('Classifying things')
+    playlist = classifier_util.suggest_playlist_from_image(all_tracks, photo)
+
+    if rock:
+        current_app.logger.info('Creating playlist')
+        playlist_name = 'feel %s' % text[:10]
+        spotify.make_playlist(access_token, playlist, playlist_name)
+        return 'Yay, the playlist "%s" is created!' % playlist_name
+    else:
+        current_app.logger.info('Outputting playlist')
+        return dumps_playlist(playlist)
+
+
 @bp.route('/playlist/create/mood')
 def playlist_create_mood():
     access_token = get_access_token()

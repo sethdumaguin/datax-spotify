@@ -6,10 +6,12 @@ import { ENDPOINT_BASE } from './constants.js';
 import { setUser } from './reducer.js';
 import MoodPickerTab from './MoodPickerTab.js';
 import SentimentTab from './SentimentTab.js';
+import PictureTab from './PictureTab.js';
 
 const TABS = {
     MOOD_PICKER: 'mood-picker',
     SENTIMENT: 'sentiment',
+    PICTURE: 'picture'
 };
 
 class Main extends React.Component {
@@ -24,6 +26,7 @@ class Main extends React.Component {
         switch (this.state.tab) {
             case TABS.MOOD_PICKER: return <MoodPickerTab />;
             case TABS.SENTIMENT: return <SentimentTab />;
+            case TABS.PICTURE: return <PictureTab />;
         }
     }
 
@@ -76,6 +79,10 @@ class Main extends React.Component {
                     <Button
                         title="Song from your Diary"
                         onPress={() => this.setState({ tab: TABS.SENTIMENT })}
+                    />
+                    <Button
+                        title="Mood from a Selfie"
+                        onPress={() => this.setState({ tab: TABS.PICTURE })}
                     />
                 </View>
                 {this.props.userId ? this.renderTabView() : null}

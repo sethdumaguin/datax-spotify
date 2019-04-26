@@ -4,6 +4,8 @@ import os
 import pickle
 import pandas as pd
 import numpy as np
+from keras.models import load_model
+import cv2
 
 from flask import current_app
 
@@ -25,6 +27,8 @@ with open('app/porter.pickle', 'rb') as fc:
 
 with open('app/word_token.pickle', 'rb') as fc:
     word_token = pickle.load(fc)
+
+face_CNN = load_model('app/face_cnn_model.h5')
 
 
 
@@ -96,6 +100,23 @@ def suggest_playlist_from_text(all_tracks_with_features, text):
 
     return suggest_playlist_from_mood(all_tracks_with_features, predicted_score)
 
+
+def suggest_playlist_from_image(all_tracks_with_features, image):
+    image.save('temp.jpg')
+    image = img_to_matrix('temp.jpg')
+
+    predicted_score = face_CNN.predict(image.reshape(1, 48, 48, 1))
+
+    current_app.logger.warn(predicted_score.reshape(7)[0])
+
+    return suggest_playlist_from_mood(all_tracks_with_features, predicted_score.reshape(7)[0])
+
+
+def img_to_matrix(imagePath):
+    image = cv2.imread(imagePath)
+    image = cv2.resize(image, (48,48))
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    return gray
 
 def stemSentence(sentence, porter, word_tokenize):
     token_words=word_tokenize(sentence)
