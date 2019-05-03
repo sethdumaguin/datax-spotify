@@ -67,7 +67,7 @@ def playlist_create_picture():
 
     if rock:
         current_app.logger.info('Creating playlist')
-        playlist_name = 'feel %s' % text[:10]
+        playlist_name = 'image'
         spotify.make_playlist(access_token, playlist, playlist_name)
         return 'Yay, the playlist "%s" is created!' % playlist_name
     else:

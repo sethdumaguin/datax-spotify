@@ -61,11 +61,17 @@ class PictureTab extends React.Component {
       this.setState({ playlist: await uploadImageAsync(result.uri, this.props.userId) });
     }
   };
+
+  async rockSpotify() {
+    const message = await uploadImageAsync(this.state.image, this.props.userId, true);
+    alert(message);
+  }
+
 }
 
 
-async function uploadImageAsync(uri, userId) {
-    let apiUrl = `${ENDPOINT_BASE}/playlist/create/picture`;
+async function uploadImageAsync(uri, userId, rock=false) {
+    let apiUrl = `${ENDPOINT_BASE}/playlist/create/picture` + (rock ? '?rock=1' : '');
 
     // Note:
     // Uncomment this if you want to experiment with local server
@@ -90,7 +96,6 @@ async function uploadImageAsync(uri, userId) {
       method: 'POST',
       body: formData,
       headers: {
-        'Accept': 'application/json',
         'Content-Type': 'multipart/form-data',
         'Authorization': userId,
       },
@@ -98,7 +103,11 @@ async function uploadImageAsync(uri, userId) {
 
     console.log({ apiUrl, options });
 
-    return (await fetch(apiUrl, options)).json();
+    const response = await fetch(apiUrl, options);
+    if (rock) {
+      return response.text();
+    }
+    return response.json();
   }
 
   const styles = StyleSheet.create({
