@@ -141,11 +141,11 @@ def suggest_playlist_from_mood_network(all_tracks_with_features, mood):
         tbl_copy.loc[:, 'artist'] = le.fit_transform(tbl_copy.loc[:, 'artist'])
         return tbl_copy
 
-    def get_features(tbl):
-        tbl_copy = tbl
-        scaler = MinMaxScaler()
-        tbl_copy = scaler.fit_transform(tbl_copy)
-        return tbl_copy
+    # def get_features(tbl):
+    #     tbl_copy = tbl
+    #     scaler = MinMaxScaler()
+    #     tbl_copy = scaler.fit_transform(tbl_copy)
+    #     return tbl_copy
 
     data['artist'] = data['artists'].apply(get_artist)
     data = prep_data(data)
@@ -155,7 +155,7 @@ def suggest_playlist_from_mood_network(all_tracks_with_features, mood):
     data = prep_artist(data)
 
     data = data.loc[:, ['name', 'artist', 'val','dB','bpm', 'nrgy', 'dnce']]
-    data = get_features(data)
+    # data = get_features(data)
 
     def predict_songs(tbl, copy):
         tbl_predicted = tbl
@@ -194,8 +194,11 @@ def suggest_playlist_from_mood_network(all_tracks_with_features, mood):
         # in_range['dists'] = abs(in_range['mood_predicted'] - score)
         # sort_by_dist = in_range.sort_values('dists')
 
+        current_app.logger.warn("First Score " + str(score_now))
+
         length_of_score = len(score)
         counter = 1
+
 
         while(len(in_range) == 0 and length_of_score != counter):
             score_now = get_score(score, previous_ind)
