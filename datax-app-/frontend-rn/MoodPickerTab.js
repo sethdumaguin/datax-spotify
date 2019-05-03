@@ -21,7 +21,7 @@ class MoodPickerTab extends React.Component {
                     <Slider
                         style={styles.slider}
                         selectedValue={this.state.mood}
-                        minimumValue={-1}
+                        minimumValue={0}
                         maximumValue={1}
                         onSlidingComplete={(value) => {
                             this.setState({ mood: value }, () => this.fetchPlaylist());

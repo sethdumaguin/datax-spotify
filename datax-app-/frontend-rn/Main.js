@@ -73,15 +73,15 @@ class Main extends React.Component {
                 <View style={styles.statusBar}></View>
                 <View style={styles.header}>
                     <Button
-                        title="Mood Slider"
+                        title="Slider"
                         onPress={() => this.setState({ tab: TABS.MOOD_PICKER })}
                     />
                     <Button
-                        title="Song from your Diary"
+                        title="Diary"
                         onPress={() => this.setState({ tab: TABS.SENTIMENT })}
                     />
                     <Button
-                        title="Mood from a Selfie"
+                        title="Selfie"
                         onPress={() => this.setState({ tab: TABS.PICTURE })}
                     />
                 </View>
