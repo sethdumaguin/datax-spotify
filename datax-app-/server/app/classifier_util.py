@@ -43,7 +43,7 @@ def suggest_playlist_from_mood(all_tracks_with_features, mood):
     data = data.rename(columns=new_labels)
     
     # current_app.logger.warn(data['artists'].values[0][0]['name'])
-    current_app.logger.warn(data.columns)
+    # current_app.logger.warn(data.columns)
 
     def prep_data(frame):
         frame_data = frame
