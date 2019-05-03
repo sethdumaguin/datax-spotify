@@ -6,4 +6,4 @@ RELEASE_CHANNEL = os.environ.get('RELEASE_CHANNEL')
 if RELEASE_CHANNEL == 'dev':
     BASE_URL = 'http://127.0.0.1:5000'
 else:
-    BASE_URL = 'http://dataxspotify.herokuapp.com'
+    BASE_URL = 'http://35.236.108.40'

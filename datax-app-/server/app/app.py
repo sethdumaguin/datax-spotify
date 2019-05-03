@@ -1,8 +1,8 @@
 from logging.config import dictConfig
 from flask import Blueprint, json, Response, redirect, request, current_app
 
-from app import spotify, classifier_util
-from app.base import RELEASE_CHANNEL
+from . import spotify, classifier_util
+from .base import RELEASE_CHANNEL
 
 dictConfig({
     'version': 1,
