@@ -162,6 +162,7 @@ def suggest_playlist_from_mood_network(all_tracks_with_features, mood):
         predicted = song_model.predict(tbl)
         predicted = np.argmax(predicted, axis=1)
         predicted = face_to_moodlyr(predicted)
+        current_app.logger.warn(predicted)
         copy['mood_predicted'] = predicted
         return copy
 
@@ -185,10 +186,12 @@ def suggest_playlist_from_mood_network(all_tracks_with_features, mood):
         if songs > 25:
             songs = 25
         in_range = tbl
-        # current_app.logger.warn(score[0])
+        current_app.logger.warn("All Scores")
+        current_app.logger.warn(score)
         score_now = get_score(score, -1)
         previous_ind = score_now
         score_now = face_to_moodlyr([score_now])[0]
+        
         in_range = in_range[in_range['mood_predicted'] == score_now]
 
         # in_range['dists'] = abs(in_range['mood_predicted'] - score)
@@ -203,6 +206,7 @@ def suggest_playlist_from_mood_network(all_tracks_with_features, mood):
         while(len(in_range) == 0 and length_of_score != counter):
             score_now = get_score(score, previous_ind)
             score_now = face_to_moodlyr([score_now])[0]
+            current_app.logger.warn("Score Now " + str(score_now))
             in_range = in_range[in_range['mood_predicted'] == score_now]
             counter += 1
 
