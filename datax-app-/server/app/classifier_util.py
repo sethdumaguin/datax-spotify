@@ -118,11 +118,11 @@ def suggest_playlist_from_mood_network(all_tracks_with_features, mood):
 
     def prep_features(tbl):
         tbl_norm = tbl
-        tbl_norm['bpm'] = normalize(tbl_norm['bpm'])
-        tbl_norm['nrgy'] = normalize(tbl_norm['nrgy'] * 100)
-        tbl_norm['dnce'] = normalize(tbl_norm['dnce'] * 100)
-        tbl_norm['val'] = normalize(tbl_norm['val'] * 100)
-        tbl_norm['acous'] = normalize(tbl_norm['acous'] * 100)
+        tbl_norm['bpm'] = tbl_norm['bpm']
+        tbl_norm['nrgy'] = tbl_norm['nrgy'] * 100
+        tbl_norm['dnce'] = tbl_norm['dnce'] * 100
+        tbl_norm['val'] = tbl_norm['val'] * 100
+        tbl_norm['acous'] = tbl_norm['acous'] * 100
         tbl_norm['dur'] = tbl_norm['dur'] / 100000
         return tbl_norm
 
@@ -141,21 +141,21 @@ def suggest_playlist_from_mood_network(all_tracks_with_features, mood):
         tbl_copy.loc[:, 'artist'] = le.fit_transform(tbl_copy.loc[:, 'artist'])
         return tbl_copy
 
-    # def get_features(tbl):
-    #     tbl_copy = tbl
-    #     scaler = MinMaxScaler()
-    #     tbl_copy = scaler.fit_transform(tbl_copy)
-    #     return tbl_copy
+    def get_features(tbl):
+        tbl_copy = tbl
+        scaler = MinMaxScaler()
+        tbl_copy = scaler.fit_transform(tbl_copy)
+        return tbl_copy
 
     data['artist'] = data['artists'].apply(get_artist)
     data = prep_data(data)
     
     data = prep_features(data)
-    data = prep_title(data)
-    data = prep_artist(data)
+    # data = prep_title(data)
+    # data = prep_artist(data)
 
-    data = data.loc[:, ['name', 'artist', 'val','dB','bpm', 'nrgy', 'dnce']]
-    # data = get_features(data)
+    data = data.loc[:, ['val','dB','bpm', 'nrgy', 'dnce']]
+    data = get_features(data)
 
     def predict_songs(tbl, copy):
         tbl_predicted = tbl
@@ -185,30 +185,41 @@ def suggest_playlist_from_mood_network(all_tracks_with_features, mood):
         
         if songs > 25:
             songs = 25
+
         in_range = tbl
-        current_app.logger.warn("All Scores")
-        current_app.logger.warn(score)
+
+        current_app.logger.warn("All Scores " + str(score))
+
         score_now = get_score(score, -1)
+        previous_scores = []
+        previous_scores.append(score_now)
         previous_ind = score_now
         score_now = face_to_moodlyr([score_now])[0]
         
         in_range = in_range[in_range['mood_predicted'] == score_now]
 
-        # in_range['dists'] = abs(in_range['mood_predicted'] - score)
-        # sort_by_dist = in_range.sort_values('dists')
-
         current_app.logger.warn("First Score " + str(score_now))
 
-        length_of_score = len(score)
-        counter = 1
+        length_in_range = len(in_range)
 
+        scores_copy = score.copy().tolist()
 
-        while(len(in_range) == 0 and length_of_score != counter):
-            score_now = get_score(score, previous_ind)
-            score_now = face_to_moodlyr([score_now])[0]
-            current_app.logger.warn("Score Now " + str(score_now))
-            in_range = in_range[in_range['mood_predicted'] == score_now]
-            counter += 1
+        while length_in_range == 0:
+            max_ind = scores_copy.index(max(score))
+            score.remove(max(score))
+            new_score = face_to_moodlyr([max_ind])
+            new_score = new_score[0]
+            current_app.logger.warn("Score Now " + str(new_score))
+            in_range = in_range[in_range['mood_predicted'] == new_score]
+            if len(in_range) > 0:
+                break
+
+        # while(len(in_range) == 0 and length_of_score != counter):
+        #     score_now = get_score(score, previous_ind)
+        #     score_now = face_to_moodlyr([score_now])[0]
+        #     current_app.logger.warn("Score Now " + str(score_now))
+        #     in_range = in_range[in_range['mood_predicted'] == score_now]
+        #     counter += 1
 
         current_app.logger.warn(score_now)
 
@@ -278,4 +289,3 @@ def stemSentence(sentence, porter, word_tokenize):
         stem_sentence.append(porter.stem(word))
         stem_sentence.append(" ")
     return "".join(stem_sentence)
-
